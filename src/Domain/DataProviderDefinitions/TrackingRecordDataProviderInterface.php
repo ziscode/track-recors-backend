@@ -13,5 +13,7 @@ interface TrackingRecordDataProviderInterface
 
     public function findAll(): array;
 
+    public function findByFilter(array $filter): object;
+
     public function remove($id): bool;
 }

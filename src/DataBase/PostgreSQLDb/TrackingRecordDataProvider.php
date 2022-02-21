@@ -87,5 +87,9 @@ class TrackingRecordDataProvider implements TrackingRecordDataProviderInterface
         return $this->em->getRepository(TrackingRecord::class)->findAll();
     }
 
+    public function findByFilter(array $filter): object
+    {
+        return $this->em->getRepository(TrackingRecord::class)->listFilter($filter);   
+    }
 
 }

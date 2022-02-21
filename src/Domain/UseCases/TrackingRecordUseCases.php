@@ -58,4 +58,9 @@ class TrackingRecordUseCases implements CrudUseCasesInterface
         return $this->dataProvider->findAll();
     }
 
+    public function filter(array $filter): ?object 
+    {
+        return $this->dataProvider->findByFilter($filter);
+    }
+
 }

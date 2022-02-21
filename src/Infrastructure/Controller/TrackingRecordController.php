@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use App\Infrastructure\Services\SerializerValidator;
 use App\Infrastructure\Dto\TrackingRecordApp;
-use App\Infrastructure\Dto\TrackingRecordWeb;
+use App\Infrastructure\Dto\TrackingRecord;
 use App\Domain\UseCases\TrackingRecordUseCases;
 use App\Infrastructure\Assemblers\TrackingRecordAssembler;
 
@@ -39,23 +39,31 @@ class TrackingRecordController extends AbstractController
     #[Route('/api/trackingrecord/save', 'tracking_record_save')]
     public function save(Request $request) : JsonResponse
     {
-        $resource = $this->service->validate($request->getContent(), TrackingRecordWeb::class);
+        
+        $resource = $this->service->validate($request->getContent(), TrackingRecord::class);
 
-        if ($resource instanceof TrackingRecordWeb) {
-            $this->useCases->create($this->assembler->resourceToEntity($resource));
+        if ($resource instanceof TrackingRecord) {
+            $entity = $this->assembler->resourceToEntity($resource);
+            
+            if ($entity->getId() === null) {
+                $this->useCases->create($entity);
+            } else {
+                $this->useCases->update($entity);
+            }
+
             return new JsonResponse(['success'=>true]);
         }
         
         return new JsonResponse($resource);
     }
     
-    #[Route('api/trackingrecord/update', 'traking_record_update')]
+    #[Route('api/trackingrecord/update/{id}', 'traking_record_update')]
     public function update(Request $request): JsonResponse
     {
-        $resource = $this->service->validate($request->getContent(), TrackingRecordWeb::class);
+        $resource = $this->service->validate($request->getContent(), TrackingRecord::class);
 
-        if ($resource instanceof TrackingRecordWeb) {
-            $this->useCases->update($this->assembler->resourceToEntity($resource));
+        if ($resource instanceof TrackingRecord) {
+            
             return new JsonResponse(['success'=>true]);
         }
         
@@ -82,8 +90,8 @@ class TrackingRecordController extends AbstractController
     #[Route('api/trackingrecord/list')]
     public function list(Request $request): JsonResponse
     {
-        $list = $this->useCases->list();
-        $resource = $this->service->serializeList($this->assembler->entitiesToResources($list));
+        $object = $this->useCases->filter(json_decode($request->getContent(), true));
+        $resource = $this->service->serializeList($this->assembler->filterEntityToResources($object));
         return JsonResponse::fromJsonString($resource);
     }
 

@@ -14,4 +14,6 @@ interface CrudUseCasesInterface
     public function delete(int $id): void;
     
     public function list(): ?array;
+
+    public function filter(array $filter): ?object;
 }
