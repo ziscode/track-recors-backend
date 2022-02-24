@@ -1,19 +1,55 @@
 security:
+    access_decision_manager:
+        strategy: affirmative
+        allow_if_all_abstain: false
+
     enable_authenticator_manager: true
+    
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\DataBase\Entity\User:
+            algorithm: auto
+
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\DataBase\Entity\User
+                property: email
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
+            anonymous: false
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            
+            # form_login:
+            #     login_path: api_login
+            #     check_path: api_login
+            #     default_target_path: api_login
+            #     username_parameter: username
 
+            custom_authenticators:
+                - App\Infrastructure\Services\LoginAuthenticator
+
+            logout:
+                path: api_logout
+                target: api_logout_response
+            
+            remember_me:
+                secret:   '%kernel.secret%'
+                lifetime: 604800 # 1 week in seconds
+                always_remember_me: true
+                path:     /
+            
+            # json_login:
+            #     remember_me: true
+            #     check_path: /api/login
+                
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -22,9 +58,12 @@ security:
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
-    access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+    access_control:         
+        - { path: ^/api/, roles: [IS_AUTHENTICATED_FULLY] }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/logout/message, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
 
 when@test:
     security:

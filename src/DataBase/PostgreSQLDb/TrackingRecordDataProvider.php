@@ -7,18 +7,15 @@ namespace App\DataBase\PostgreSQLDb;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Domain\DataProviderDefinitions\TrackingRecordDataProviderInterface;
 use App\DataBase\Entity\TrackingRecord;
-use App\DataBase\Utils\EntityMetaData;
 
 class TrackingRecordDataProvider implements TrackingRecordDataProviderInterface
 {
     private $doctrine;
     private $em;
-    private $entityMetaData;
-
-    public function __construct(ManagerRegistry $doctrine, EntityMetaData $entityMetaData) {
+    
+    public function __construct(ManagerRegistry $doctrine) {
         $this->doctrine = $doctrine;
         $this->em = $this->doctrine->getManager();
-        $this->entityMetaData = $entityMetaData;
     }
 
     public function save(object $entity): int 

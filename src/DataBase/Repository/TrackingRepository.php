@@ -23,7 +23,8 @@ class TrackingRepository extends ServiceEntityRepository
         parent::__construct($registry, TrackingRecord::class);
     }
 
-    public function listFilter(array $filter = []) {
+    public function listFilter(array $filter = []) 
+    {
         $page = isset($filter['page']) ? (int)$filter['page'] : 1;
         $queryParams = $this->createQueryParams($filter);
         $params = $queryParams['params'];
